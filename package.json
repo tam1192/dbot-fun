@@ -1,0 +1,26 @@
+{
+  "name": "dbot-fun",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "deploy": "node deploy-commands.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tam1192/dbot-fun.git"
+  },
+  "author": "nikki9750",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tam1192/dbot-fun/issues"
+  },
+  "homepage": "https://github.com/tam1192/dbot-fun#readme",
+  "dependencies": {
+    "discord.js": "^14.11.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.45.0"
+  }
+}
