@@ -7,7 +7,7 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName(name)
 		.setDescription('idを表示します。')
-		.addUserOption(option => option.setName('target').setDescription('username'))
+		.addUserOption(option => option.setName('target').setDescription('username').setRequired(true))
 		.addBooleanOption(option => option.setName('public').setDescription('public?')),
 	async execute(interaction) {
 		const u = await interaction.options.getUser('target');
