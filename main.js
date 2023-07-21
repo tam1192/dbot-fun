@@ -5,37 +5,76 @@ const path = require('path');
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
 const { Discord } = require('./config.json');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+/**
+ * ディレクトリを走査し、ファイルを見つけます。
+ * @param {String} dir 走査するディレクトリ
+ * @param {Function} callback 見つけたとき
+ * @param {{subdir: boolean, filetype: string}} options オプション
+ */
+function loadDirectory(dir, callback,
+	options = { subdir: true, filetype: undefined }) {
 
-client.cmds = new Collection();
-
-const foldersPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(foldersPath);
-
-for (const folder of commandFolders) {
-	const commandsPath = path.join(foldersPath, folder);
-	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-	for (const file of commandFiles) {
-		const filePath = path.join(commandsPath, file);
-		const command = require(filePath);
-		if ('data' in command && 'execute' in command) {
-			client.cmds.set(command.data.name, command);
+	/**
+	 * @type {String[]} ディレクトリの内容
+	 */
+	const dirfiles = fs.readdirSync(dir);
+	for (const file of dirfiles) {
+		// ファイル名
+		const filepath = path.join(dir, file);
+		// ファイルのstatを読み込み
+		const filestat = fs.statSync(filepath);
+		// ディレクトリならば
+		if (options.subdir == true && filestat.isDirectory()) {
+			// 再帰関数
+			loadDirectory(filepath, callback);
+		}
+		else if (
+			options.filetype == undefined ||
+			filepath.endsWith(options.filetype)) {
+			// コールバックする
+			callback(filepath);
 		}
 	}
 }
 
-const eventsPath = path.join(__dirname, 'events');
-const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
-
-for (const file of eventFiles) {
-	const filePath = path.join(eventsPath, file);
-	const event = require(filePath);
-	if (event.once) {
-		client.once(event.name, (...args) => event.execute(...args));
-	}
-	else {
-		client.on(event.name, (...args) => event.execute(...args));
-	}
+function loadCollection(dir, collection) {
+	loadDirectory(path.join(__dirname, dir), file => {
+		const command = require(file);
+		if ('name' in command && 'data' in command && 'execute' in command) {
+			collection.set(command.name, command);
+		}
+		// else {
+		// 	console.warn(`${file}はコマンドではありません！`);
+		// }
+	}, {
+		subdir: true,
+		filetype: '.js',
+	});
 }
+
+function loadEvents(dir, c) {
+	loadDirectory(path.join(__dirname, dir), file => {
+		const event = require(file);
+		if (event.once) {
+			c.once(event.name, (...args) => event.execute(...args));
+		}
+		else {
+			c.on(event.name, (...args) => event.execute(...args));
+		}
+	}, {
+		subdir: false,
+		filetype: '.js',
+	});
+}
+
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+client.cmds = new Collection();
+client.modals = new Collection();
+
+loadCollection('commands', client.cmds);
+loadCollection('modals', client.modals);
+loadEvents('events', client);
+
 
 client.login(Discord.token);

@@ -1,20 +1,21 @@
-const timer = async function(sectime) {
-	const start = Date.now();
-	const stop = start + (sectime * 1000);
-	// eslint-disable-next-line no-constant-condition
-	while (true) {
-		if (stop < Date.now()) {
-			return 0;
-		}
-	}
-};
+const fs = require('fs');
+const path = require('path');
+const enn = require('./test2');
 
-async function main() {
-	console.log('timer_start');
-	await timer(10);
-	console.log('timer_stop');
-}
+// function loadDirectory(dir, filetype, callback) {
+// 	const dirfiles = fs.readdirSync(dir);
+// 	for (const file of dirfiles) {
+// 		const filepath = path.join(dir, file);
+// 		const filestat = fs.statSync(filepath);
+// 		if (filestat.isDirectory()) {
+// 			loadDirectory(filepath, filetype, callback);
+// 		}
+// 		else if (filepath.endsWith(filetype)) {
+// 			callback(filepath);
+// 		}
+// 	}
+// }
 
-console.log('start');
-main();
-console.log('stop');
+// loadDirectory(path.join(__dirname, 'commands'), '.js', console.log);
+
+console.log(enn(10));

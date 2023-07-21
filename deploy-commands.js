@@ -3,27 +3,49 @@ const { Discord } = require('./config.json');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const commands = [];
-// Grab all the command files from the commands directory you created earlier
-const foldersPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(foldersPath);
+/**
+ * ディレクトリを走査し、ファイルを見つけます。
+ * @param {String} dir 走査するディレクトリ
+ * @param {Function} callback 見つけたとき
+ * @param {{subdir: boolean, filetype: string}} options オプション
+ */
+function loadDirectory(dir, callback,
+	options = { subdir: true, filetype: undefined }) {
 
-for (const folder of commandFolders) {
-	// Grab all the command files from the commands directory you created earlier
-	const commandsPath = path.join(foldersPath, folder);
-	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-	// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
-	for (const file of commandFiles) {
-		const filePath = path.join(commandsPath, file);
-		const command = require(filePath);
-		if ('data' in command && 'execute' in command) {
-			commands.push(command.data.toJSON());
+	/**
+	 * @type {String[]} ディレクトリの内容
+	 */
+	const dirfiles = fs.readdirSync(dir);
+	for (const file of dirfiles) {
+		// ファイル名
+		const filepath = path.join(dir, file);
+		// ファイルのstatを読み込み
+		const filestat = fs.statSync(filepath);
+		// ディレクトリならば
+		if (options.subdir == true && filestat.isDirectory()) {
+			// 再帰関数
+			loadDirectory(filepath, callback);
 		}
-		else {
-			console.warn(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+		else if (
+			options.filetype == undefined ||
+			filepath.endsWith(options.filetype)) {
+			// コールバックする
+			callback(filepath);
 		}
 	}
 }
+
+console.log('start');
+const commands = [];
+loadDirectory(path.join(__dirname, 'commands'), file => {
+	const command = require(file);
+	if ('name' in command && 'data' in command && 'execute' in command) {
+		commands.push(command.data.toJSON());
+	}
+}, {
+	subdir: true,
+	filetype: '.js',
+});
 
 // Construct and prepare an instance of the REST module
 const rest = new REST().setToken(Discord.token);

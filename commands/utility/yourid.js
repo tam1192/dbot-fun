@@ -1,8 +1,11 @@
 const { SlashCommandBuilder } = require('discord.js');
 
+const name = 'yourid';
+
 module.exports = {
+	name: name,
 	data: new SlashCommandBuilder()
-		.setName('yourid')
+		.setName(name)
 		.setDescription('idを表示します。')
 		.addUserOption(option => option.setName('target').setDescription('username'))
 		.addBooleanOption(option => option.setName('public').setDescription('public?')),
