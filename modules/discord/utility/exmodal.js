@@ -12,8 +12,8 @@ module.exports = {
 	 * @param {Interaction} interaction
 	 */
 	async execute(interaction) {
-		const modals = interaction.client.modals;
-		const modal = modals.get('mymodal');
+		const cmds = interaction.client.cmds;
+		const modal = cmds.get('mymodal');
 		await interaction.showModal(modal.data);
 	},
 };

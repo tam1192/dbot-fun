@@ -3,6 +3,7 @@ const { Events, Client, Interaction } = require('discord.js');
 
 module.exports = {
 	name: Events.InteractionCreate,
+	once: false,
 	/**
 	 * @param {Interaction} interaction
 	 */
@@ -11,10 +12,12 @@ module.exports = {
 		 * @type {Client}
 		 */
 		const client = interaction.client;
+		const cmds = client.cmds;
 
 		if (interaction.isChatInputCommand()) {
 			const name = interaction.commandName;
-			const command = client.cmds.get(name);
+			const command = cmds.get(name);
+			// const command = client.cmds.get(name);
 			if (!command) {
 				console.error(`コマンドが見つかりません:${name}`);
 			}
@@ -27,8 +30,10 @@ module.exports = {
 			}
 		}
 		else if (interaction.isModalSubmit()) {
-			const modals = client.modals;
-			const modal = modals.get(interaction.customId);
+			const name = interaction.customId;
+			const modal = cmds.get(name);
+			// const modals = client.modals;
+			// const modal = modals.get(interaction.customId);
 			await modal.execute(interaction);
 		}
 		else {

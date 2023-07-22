@@ -1,51 +1,18 @@
 'use strict';
-
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
+const loadDirectory = require('./modules/loadDirectory');
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
-const { Discord } = require('./config.json');
-
-/**
- * ディレクトリを走査し、ファイルを見つけます。
- * @param {String} dir 走査するディレクトリ
- * @param {Function} callback 見つけたとき
- * @param {{subdir: boolean, filetype: string}} options オプション
- */
-function loadDirectory(dir, callback,
-	options = { subdir: true, filetype: undefined }) {
-
-	/**
-	 * @type {String[]} ディレクトリの内容
-	 */
-	const dirfiles = fs.readdirSync(dir);
-	for (const file of dirfiles) {
-		// ファイル名
-		const filepath = path.join(dir, file);
-		// ファイルのstatを読み込み
-		const filestat = fs.statSync(filepath);
-		// ディレクトリならば
-		if (options.subdir == true && filestat.isDirectory()) {
-			// 再帰関数
-			loadDirectory(filepath, callback);
-		}
-		else if (
-			options.filetype == undefined ||
-			filepath.endsWith(options.filetype)) {
-			// コールバックする
-			callback(filepath);
-		}
-	}
-}
+const { Discord, defaultGuildSetting } = require('./config.json');
 
 function loadCollection(dir, collection) {
 	loadDirectory(path.join(__dirname, dir), file => {
+		// コマンドを読み込む
 		const command = require(file);
 		if ('name' in command && 'data' in command && 'execute' in command) {
+			// コレクションに登録する。
 			collection.set(command.name, command);
 		}
-		// else {
-		// 	console.warn(`${file}はコマンドではありません！`);
-		// }
 	}, {
 		subdir: true,
 		filetype: '.js',
@@ -67,13 +34,38 @@ function loadEvents(dir, c) {
 	});
 }
 
+// クライアントインスタンスの作成
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-client.cmds = new Collection();
-client.modals = new Collection();
+// Ctrl+Cでexitするようにする。
+process.once('SIGINT', () => process.exit(0));
+// exit
+process.once('exit', () => {
+	client.destroy();
+	console.log('end');
+});
 
-loadCollection('commands', client.cmds);
-loadCollection('modals', client.modals);
+// 設定ファイル有無
+const settingsPath = path.join(__dirname, 'settings');
+const settingsDir = fs.existsSync(settingsPath);
+// 設定ファイルがなければ
+if (!settingsDir) {
+	// 作成する
+	fs.mkdirSync(settingsPath);
+	fs.mkdirSync(path.join(settingsPath, 'guilds'));
+}
+
+// 設定ファイルの場所
+client.settingsPath = path.join(__dirname, 'settings');
+// コマンド
+client.cmds = new Collection();
+// // モーダル
+// client.modals = new Collection();
+// ギルドの初期設定
+// client.defaultGuildSetting = defaultGuildSetting;
+
+// loadCollection('commands', client.cmds);
+loadCollection('modals', client.cmds);
 loadEvents('events', client);
 
 
