@@ -12,7 +12,6 @@ module.exports = {
 	async execute(interaction) {
 		const u = await interaction.options.getUser('target');
 		const b = await interaction.options.getBoolean('public');
-		console.log(b);
 		await interaction.reply({
 			content: `idは「${u.id}」`,
 			ephemeral: (() => {

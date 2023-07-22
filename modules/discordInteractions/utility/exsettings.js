@@ -14,19 +14,25 @@ module.exports = {
 	 * @param {Interaction} interaction
 	 */
 	async execute(interaction) {
-		const b = interaction.options.getBoolean('a');
-		const Guild = interaction.guild;
 		const replymsg = [];
+		const Guild = interaction.guild;
+		// 引数
+		const a = interaction.options.getBoolean('a');
 
-		if (b == undefined) {
+		// 引数無なら
+		if (a == undefined) {
 			replymsg.push(`**${Guild.name}の設定**`);
 			replymsg.push(`- 項目A: ${Guild.settings.A}`);
 		}
+		// 引数有なら
 		else {
 			replymsg.push('**情報を保存しました。**');
-			Guild.settings.A = b;
+			// ギルド設定を保存
+			Guild.settings.A = a;
 			fs.writeFileSync(Guild.settingsfile, JSON.stringify(Guild.settings), 'utf-8');
 		}
+
+		// 返信する
 		interaction.reply(replymsg.join('\n'));
 	},
 };

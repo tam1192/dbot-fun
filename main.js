@@ -1,38 +1,11 @@
 'use strict';
-const fs = require('fs-extra');
 const path = require('path');
-const loadDirectory = require('./modules/loadDirectory');
-const { Client, Collection, GatewayIntentBits } = require('discord.js');
+const discordEvents = require('./modules/discordEvents');
+const discordInteractions = require('./modules/discordInteractions');
+const mkdir = require('./modules/mkdir');
+const discordDeploy = require('./modules/discordDeploy');
+const { Client, GatewayIntentBits } = require('discord.js');
 const { Discord, defaultGuildSetting } = require('./config.json');
-
-function loadCollection(dir, collection) {
-	loadDirectory(path.join(__dirname, dir), file => {
-		// コマンドを読み込む
-		const command = require(file);
-		if ('name' in command && 'data' in command && 'execute' in command) {
-			// コレクションに登録する。
-			collection.set(command.name, command);
-		}
-	}, {
-		subdir: true,
-		filetype: '.js',
-	});
-}
-
-function loadEvents(dir, c) {
-	loadDirectory(path.join(__dirname, dir), file => {
-		const event = require(file);
-		if (event.once) {
-			c.once(event.name, (...args) => event.execute(...args));
-		}
-		else {
-			c.on(event.name, (...args) => event.execute(...args));
-		}
-	}, {
-		subdir: false,
-		filetype: '.js',
-	});
-}
 
 // クライアントインスタンスの作成
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -45,28 +18,35 @@ process.once('exit', () => {
 	console.log('end');
 });
 
-// 設定ファイル有無
+// 設定ファイルの場所
 const settingsPath = path.join(__dirname, 'settings');
-const settingsDir = fs.existsSync(settingsPath);
-// 設定ファイルがなければ
-if (!settingsDir) {
-	// 作成する
-	fs.mkdirSync(settingsPath);
-	fs.mkdirSync(path.join(settingsPath, 'guilds'));
+// settings
+client.settingsPath = mkdir(settingsPath);
+// settings/guilds
+mkdir(path.join(settingsPath, 'guilds'));
+// settings/client
+const clientPath = mkdir(path.join(settingsPath, 'client'));
+// settings/client/command
+const commandPath = mkdir(path.join(clientPath, 'command'));
+
+
+// ギルドの初期設定
+client.defaultGuildSetting = defaultGuildSetting;
+// インタラクション情報登録
+client.Interactions = discordInteractions();
+// イベント登録
+discordEvents(client);
+
+
+// コマンド登録
+async function main() {
+	try {
+		await discordDeploy(Discord.token, Discord.clientId, path.join(commandPath, `${Discord.clientId}.js`));
+	}
+	catch (error) {
+		process.exit(1);
+	}
+	client.login(Discord.token);
 }
 
-// 設定ファイルの場所
-client.settingsPath = path.join(__dirname, 'settings');
-// コマンド
-client.cmds = new Collection();
-// // モーダル
-// client.modals = new Collection();
-// ギルドの初期設定
-// client.defaultGuildSetting = defaultGuildSetting;
-
-// loadCollection('commands', client.cmds);
-loadCollection('modals', client.cmds);
-loadEvents('events', client);
-
-
-client.login(Discord.token);
+main();
