@@ -1,5 +1,7 @@
-// eslint-disable-next-line no-unused-vars
-const { SlashCommandBuilder, Interaction } = require('discord.js');
+const { SlashCommandBuilder } = require('discord.js');
+/**
+ * モーダルを呼び出すコマンド
+ */
 
 const name = 'modal';
 
@@ -8,12 +10,10 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName(name)
 		.setDescription('testmodal'),
-	/**
-	 * @param {Interaction} interaction
-	 */
 	async execute(interaction) {
 		const client = interaction.client;
 		const modal = client.Interactions.get('mymodal');
+		// モーダルを呼び出す。
 		await interaction.showModal(modal.data);
 	},
 };

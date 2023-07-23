@@ -1,14 +1,10 @@
-// eslint-disable-next-line no-unused-vars
-const { Events, Client, Routes, SlashCommandBuilder, ContextMenuCommandBuilder } = require('discord.js');
+const { Events, Routes, SlashCommandBuilder, ContextMenuCommandBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
-	/**
-	 * @param {Client} client
-	 */
 	async execute(client) {
 		const guilds = client.guilds;
 		const Interactions = client.Interactions;

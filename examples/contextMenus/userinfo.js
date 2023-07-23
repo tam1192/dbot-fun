@@ -1,4 +1,7 @@
 const { ContextMenuCommandBuilder, ApplicationCommandType } = require('discord.js');
+/**
+ * ユーザーに対するコンテキストメニューの例
+ */
 
 const name = 'userinfo';
 
@@ -7,8 +10,8 @@ module.exports = {
 	data: new ContextMenuCommandBuilder()
 		.setName(name)
 		.setType(ApplicationCommandType.User),
-	// eslint-disable-next-line no-unused-vars
 	async execute(interaction) {
-		await interaction.reply('test');
+		const user = interaction.targetUser;
+		await interaction.reply(`${user}が呼び出されました。`);
 	},
 };
