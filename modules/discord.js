@@ -14,7 +14,7 @@ module.exports = async (config, settingsPath) => {
 	// ギルドの初期設定
 	client.defaultGuildSetting = config.defaultGuildSetting;
 	const promises = [];
-	promises.push(new Promise((resolve, reject)=>{
+	promises.push(new Promise((resolve, reject) => {
 		// インタラクション情報登録
 		discordInteractions().then(value => {
 			client.Interactions = value;
