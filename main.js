@@ -2,7 +2,7 @@
 const discord = require('./modules/discord');
 const config = require('./config.json');
 const path = require('path');
-const mkdir = require('./modules/mkdir');
+const mkdir = require('./modules/mkdirSync');
 
 // 設定ファイルを作成・ロードする。:w
 const settingsPath = mkdir(path.join(__dirname, 'settings'));

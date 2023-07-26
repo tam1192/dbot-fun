@@ -1,8 +1,8 @@
-const path = require('path');
+const path = require('path').join;
 const loadDirectory = require('./loadDirectory');
 
-module.exports = function(client) {
-	loadDirectory(path.join(__dirname, 'discordEvents'), file => {
+module.exports = async function(client) {
+	await loadDirectory(path(__dirname, 'discordEvents'), file => {
 		const event = require(file);
 		if (event.once) {
 			client.once(event.name, (...args) => event.execute(...args));
@@ -14,4 +14,5 @@ module.exports = function(client) {
 		subdir: false,
 		filetype: '.js',
 	});
+	return 0;
 };

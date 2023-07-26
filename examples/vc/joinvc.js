@@ -20,7 +20,7 @@ module.exports = {
 			channelId: channelId,
 			guildId: guildId,
 			adapterCreator: voiceAdapterCreator,
-			selfDeaf: false,
+			selfDeaf: true,
 		});
 		await interaction.editReply(`参加しました：${channelname}`);
 	},

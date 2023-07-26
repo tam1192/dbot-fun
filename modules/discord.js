@@ -2,32 +2,28 @@
 const discordEvents = require('./discordEvents');
 const discordInteractions = require('./discordInteractions');
 const { Client, GatewayIntentBits } = require('discord.js');
-const { getVoiceConnections } = require('@discordjs/voice');
-// const { generateDependencyReport } = require('@discordjs/voice');
-
-// console.log(generateDependencyReport());
 
 module.exports = async (config, settingsPath) => {
 	// クライアントインスタンスの作成
 	const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
 	// 設定ファイルの場所を登録
 	client.settingsPath = settingsPath;
+	// musicbot用
+	// // サウンドファイルの場所を登録
+	// client.soundPath = sound;
 	// ギルドの初期設定
 	client.defaultGuildSetting = config.defaultGuildSetting;
-	// インタラクション情報登録
-	client.Interactions = discordInteractions();
+	const promises = [];
+	promises.push(new Promise((resolve, reject)=>{
+		// インタラクション情報登録
+		discordInteractions().then(value => {
+			client.Interactions = value;
+			resolve(0);
+		}).catch(value => reject(value));
+	}));
 	// イベント登録
-	discordEvents(client);
-	// exitシグナルでclientの接続を切るようにシグナル登録。
-	process.once('exit', () => {
-		client.destroy();
-		const vcs = getVoiceConnections();
-		if (vcs != undefined) {
-			for (const vc of vcs) {
-				vc[1].destroy();
-			}
-		}
-	});
+	promises.push(discordEvents(client));
+	await Promise.all(promises);
 	// discordにログインする。
 	await client.login(config.token);
 

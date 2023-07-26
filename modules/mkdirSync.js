@@ -1,17 +1,17 @@
-const { exists, mkdir } = require('fs-extra');
+const { existsSync, mkdirSync } = require('fs-extra');
 
 /**
  * ディレクトリがなければ作成する。
  * @param {String} dirPath
- * @returns {Promise}
+ * @returns {String}
  */
-module.exports = async (dirPath) => {
+module.exports = (dirPath) => {
 	// 設定ファイル有無
-	const Dir = await exists(dirPath);
+	const Dir = existsSync(dirPath);
 	// 設定ファイルがなければ
 	if (!Dir) {
 		// 作成する
-		await mkdir(dirPath);
+		mkdirSync(dirPath);
 	}
 	return dirPath;
 };
