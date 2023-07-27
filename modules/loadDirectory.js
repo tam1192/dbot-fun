@@ -1,3 +1,5 @@
+'use strict';
+
 const { readdir, statSync } = require('fs-extra');
 const path = require('path').join;
 
